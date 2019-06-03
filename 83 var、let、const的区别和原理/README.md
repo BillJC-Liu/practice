@@ -1,4 +1,4 @@
-#var、let、const三者的区别和实现原理
+###var、let、const三者的区别和实现原理
 ######1.先来说说var let const 三者的区别
 * var 是函数作用域
 * var 和 let 用以声明变量，const 用于声明只读的常量
