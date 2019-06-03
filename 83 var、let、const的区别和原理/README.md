@@ -1,4 +1,4 @@
-###var、let、const三者的区别和实现原理
+#var、let、const三者的区别和实现原理
 ######1.先来说说var let const 三者的区别
 * var 是函数作用域
 * var 和 let 用以声明变量，const 用于声明只读的常量
@@ -20,7 +20,7 @@
 **变量提升的定义：**所有变量的声明语句都会在被提升到代码的头部，这就是变量提升。<br/>
 **原理：**JS引擎的工作方式是①先解析代码，获取所有被声明的变量 ②然后在运行。   分为预编译和执行两个阶段。
 ######3.let 真的不会有变量提升的情况嘛？
-  &nbsp;&nbsp;答案是错误的，let也会变量提升的情况。具体看下面代码。
+  &nbsp;&nbsp;答案是错误的，let也存在变量提升的情况。具体看下面代码。
 ```javascript
   console.log(a); // Uncaught ReferenceError: a is not defined
   let a = 1;
