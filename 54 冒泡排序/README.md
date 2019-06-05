@@ -1,5 +1,5 @@
 # 冒泡排序如何实现，时间复杂度是多少，还能如何改进？
-
+时间复杂度为 n^2
 ```javascript
   function maopao(arr){
     const array = [...arr]
