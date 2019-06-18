@@ -89,6 +89,96 @@
 #### 网络传输
   从客户机到服务器需要通过许多网络设备，一般地，包括集线器，交换器，路由器等。
  
+<br/>
+# ES6 中Set、Map类型的内部实现
+> 主要知识点：Set的基本操作，Weak Set，Map的基本操作，Weak Map
+ ![SetMap](./Set&Map/SetMap.png)
 
+### 1.ES6中的Set
+ <!-- ES6中提供了Set数据容器，这是一个能够`存储无重复值的有序列表`。
+ 通过`new Set()`可以创建Set，然后通过`add`方法能够向Set中添加数据项
+  -->
+ 原来**Set**是一个**集合**的数据结构，**Map**是一种叫**字典**的数据结构。
+ ##### 集合
+ * 集合是由一组无序切不重复的项组成,可以想象集合是一个既没有重复元素又没有顺序概念的数组。
+ * ES6中提供了新的数据结构Set。它类似数组，但是它的成员时唯一的，没有重复的值。
+ * Set本身就是一个构造函数，用来生成Set结构
+ ```javascript
+  let set  = new Set();
+  set.add(1);
+  set.add("1");
+  console.log(set.size()) // 2
+ ```
+ ##### Set实例的属性和方法
+ * Set的属性：set.size();返回集合中元素的数量
+ * Set的方法：
+  * 操作方法：
+    * add(val) ：向集合中添加新的项
+    * delete(val) ： 删除集合中一个项
+    * has(val) ：判断该值是否存在于集合中，返回Boolean
+    * clear() ：将集合清空
+  * 遍历方法：
+    * keys() ：返回一个包含集合中所有键的数组
+    * values() ：返回一个包含集合中所有值的数组
+    * entries() ：返回一个包含集合中键值对的数组(实用性不高)
+    * forEach() ：用于对集合成员执行某种操作，没有返回值。
+    
+ ##### has方法
+ 首先要实现的是has方法，因为在add或delete等方法中都会调用，下面看看它的实现
+ ```javascript
+    function Set(){
+      let items={};
+      this.size = 0 ; 
+      this.has=function(val){
+        // 对象都有hasOwnProperty方法，判断是否拥有特性属性
+        return items.hasOwnProperty(val);
+      }
+    }
+ ```
 
- # ES6 中Set、Map类型的内部实现
+ ##### add方法
+ ```javascript
+  this.add = function(val){
+    if(!this.has(val)){
+      items[val] = val;
+      this.size++
+      return true
+    }
+    return false
+  }
+ ``` 
+
+ ##### delete和clear方法
+ ```javascript
+  this.delete = function(val){
+    if(this.has(val)){
+      delete items[val];
+      this.size --;
+      return true;
+    }
+    return false;
+  }
+
+  this.clear= function(){
+    items = {};
+    this.size = 0 ;
+  }
+
+ ```
+
+ ##### keys和values方法
+  可通过ES6对Object的扩展可以轻松实现对应的方法：
+ ```javascript
+  this.keys = function(){
+    return Object.keys(items); // 返回遍历集合的所有键名的数组
+  }
+
+  this.values = function(){
+    return Object.values(items); // 返回遍历集合的所有键值的数组 
+  }
+ ```
+  需要注意的是，Object的这几个方法都是按照值大小，从小到大遍历的数组。
+
+  ##### forEach方法
+  
+  
