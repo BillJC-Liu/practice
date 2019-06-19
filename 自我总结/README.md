@@ -42,6 +42,10 @@
   * 为什么要四次挥手?
     这是因为服务端在LISTEN状态下，收到建立链接请求的SYN报文后，把ACK和SYN放在一个报文里发送给客户端。而关闭链接时，当收到对方的FIN报文时，仅仅表示对方不在发送数据了，但是还是能接收数据，己方是否现在关闭发送数据通道，需要上层应用来决定，因此，己方ACK和FIN一般都会分开发送。
 
+
+### TCP为什么不是4此握手，2次挥手？
+  《计算机网络》第四版中讲“三次握手”的目的是“为了防止已失效的连接请求报文段突然又传送到了服务端，因而产生错误”。
+
 ### HTTP报文
   ![报文格式](./1.http/报文格式.png)
 
@@ -63,7 +67,6 @@
   * 第三次握手：将证书生成的预主秘钥加密，生成一个随机数，将随机数和加密后的预主秘钥发给服务端，但该随机数是不能被中间人拿到的，只有客户端和服务端知道的随机数。服务端将加密的预主秘钥进行私钥解密。
   * 第四次握手：服务端和客户端将前三次握手生成的随机数进行一个算法操作。进行加密数据传输，这里中间人无法解密，因为中间人没有私钥，同时也没有第三次握手时生成的随机数，所以保证了数据传输的安全性。
 
-<br />
 # 从URL输入到页面渲染的过程
 
   1. 浏览器构建HTTP Request请求
@@ -92,3 +95,97 @@
 
 
  # ES6 中Set、Map类型的内部实现
+
+
+ # React 
+ ### React与vue的差异
+  从数据双向绑定、组件及数据流、路由、状态管理等方面来分别对比一下怎样去使用Vue和React。
+
+ ##### 数据双向绑定
+  什么是数据双向绑定：View层和Model层的数据相互影响。
+  View层的表但操作、触发时间可能会引起数据变动；ajax请求也可能会引起数据变动，某一数据变动引起另外关联数据的改变。
+
+ ##### React的设计思想
+   从设计上看，React无法和其他框架直接对比，React不是一个MVC框架，而是一个用于构建组件化的UI库，是一个前端界面开发工具。在MVC中属于V层。React并没有重复造轮子，而是有很多颠覆性的创新，具体如下：
+   * 编写简单直观的代码：丹神解释，React最大价值不是高性能的虚拟DOM、封装事件机制、服务端渲染，而是声明式的直观的编码方式。
+   * 简化可复用的组件
+
+ ### 怎么理解虚拟(Virtual) DOM
+  概念：改变真实DOM状态有庀改变一个JavaScript对象的花销要大得多。
+  Virtual DOM 是一个映射真实DOM的JavaScript对象，如果需要改变任何元素的状态，那么是现在Virtual DOM上进行改变，而不是直接改变真实DOM。当有变化产生时，一个新的Virtual DOM对象会被创建并计算新旧Virtual DOM之间的差别（这里涉及到Diff算法）。之后这些差别会应用在真实的DOM上。
+
+ ### Diff算法
+
+ ### setState是真正的异步嘛？什么时候是异步？什么时候是同步？
+  1. setState并不是真正的异步，只是在实现上产生异步的错觉。他还是同步的。dan神给出的两个理由：
+    * 保证内部数据的统一
+
+    ```javascript
+      console.log(this.state.value); // 0
+      this.setState({ value : this.state.value + 1 }); 
+      console.log(this.state.value); // 1
+      this.setState({ value : this.state.value + 1 }); 
+      console.log(this.state.value); // 2
+    ```
+    在上面一段代码中，在state中，setState同步是可以的。但是到了props传值时，也用同步setState的模式就会有问题。
+
+    ```javascript
+      console.log(this.props.value) // 0
+      this.props.onIncrement();
+      console.log(this.props.value) // 0
+      this.props.onIncrement();
+      console.log(this.props.value) // 0
+    ```
+    父节点传递给子节点的props是不能同步刷新的，setState同步re-render是很差的机制。无法同步re-render，就无法同步刷新this.props，无法保证子节点拿到的props和父节点的state一致。破坏了内部数据统一。
+
+    * setState异步更新状态使得并发更新组件成为可能
+    首先讨论是否同步刷新state有一个前提那就是我们默认更新节点是在遵循特定的顺序的。但是按默认顺序更新组件在以后的react中可能就变了。哎以后的react的更新机制中，我们可能加入setState优先级这一概念。举个栗子：比如你现在正在打字，那么TextBox组件需要实时的刷新。但是当你在输入的时候，来了一个信息，这个时候，可能让信息延后刷新可能更符合交互。异步rendering不仅仅在性能上的优化，而且这可能是react组件模型在发生的根本性的改变。
+
+    * 总结：
+      * setState只在合成时间和钩子函数中是“异步”的，在原生时间事件和setTimeout中都是同步的。
+      * setState的“异步”并不是说内部由异步代码实现，其实本身执行的过程和代码都是同步的，只是在合成事件和钩子函数的调用顺序在更新之前，导致合成事件和钩子函数中没法立刻拿到更新后的值，形成了所谓的“异步”。
+      * setState的批量更新优化也是建立在“异步”之上的，原生事件和setTimeout中不会批量更新，在“异步”中如果对同一个值进行多次setState，setState的批量更新策略会对其进行覆盖，去最后一次的执行，如果是同时setState多个不同的值，在更新时会对其进行合并批量更新。  
+    
+
+ ### forceUpdate强制render经历了哪些生命周期，子组件呢？
+   componentWillUpdate
+   render
+   componentDidUpdate
+   <br/>
+   调用forceUpdate() 将会导致render() 方法在相应的组件上被调用，并且子级组件也会调用自己的render()。但是如果标记改变了，那么React仅会更新DOM。
+   <br/>
+   通常情况下，应该尽量避免所有使用forceUpdate()的情况，在render()中仅从this.props和this.state中读取数据。这会使应用大大简化，并且更加高效。
+
+ ### React的性能优化手段
+
+ ### fragment的实现
+
+
+ # Promise的实现原理，并手写Promise的实现
+ ### promise是什么
+ > A promise represents the eventual result of an asynchronous operation. --Promises/A+
+ > A Promise is an object that is used as a placeholder for the eventual results of a deferred (and possibly asynchronous) computation.  --ECMAscript
+  **Promise/A+**规范中标识为一个异步操作的最终结果，**ECMAscript**规范定义为延时或异步计算最终结果的占位符。严格来说，**Promise**是一种封装和组合未来值得易于复用机制，实现关注点分离，异步流程控制，异常冒泡，串行/并行控制等。
+  
+### thenable对象
+  **thenable**是一个定义**then(...)**方法的对象或函数。**thenable**对象的存在目的是使**Promise**的实现更具有通用性，只要其暴露出一个遵循**promise/A+**规范的**then(...)**方法。同时也会使遵循**promise/A+**规范的实现可以与那些不太规范但可用的实现能良好共存。
+
+  识别**thenable**或行为类似**Promise**对象可以根据其是否具有**then(...)**方法来判断，这其实叫**类型检查**也可以叫**鸭式辨型**。对于**thenable**值鸭式类型检测大致类似于：
+  ```javascript
+    if( p !== null && 
+        (
+          typeof p === "function" || 
+          typeof p === "object"
+        ) &&
+        typeof p.then === "function"
+     ){
+      //  thenable
+     }else {
+      //  非 thenable
+     }
+  ```
+### then 回调异步执行
+ **promise**实例化时传入的函数会立即执行，**then(...)**中的回调需要异步延迟调用。在ESMAscript中规定明确**prosmie**是**微任务(micro-task)**。在执行任务时，JS引擎会将所有的任务按类别分为两个队列，首先是**宏任务(macro-task)**也叫**task queue**中取出一个任务，执行完后的，会在第一轮执行的宏任务中是否有微任务，有微任务的话立即执行，执行完后到浏览器渲染，然后再进行下一轮的宏任务执行。
+
+### Promise状态
+**promise**必须为以下三种状态之一：等状态（pendding）、执行态（Fulfilled）和拒绝态（Rejected）。一旦**promise**被**resolve**或****
