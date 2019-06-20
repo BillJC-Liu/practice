@@ -92,10 +92,97 @@
 #### 网络传输
   从客户机到服务器需要通过许多网络设备，一般地，包括集线器，交换器，路由器等。
  
+# ES6 中Set、Map类型的内部实现
+> 主要知识点：Set的基本操作，Weak Set，Map的基本操作，Weak Map
+ ![SetMap](./Set&Map/SetMap.png)
 
+### 1.ES6中的Set
+ <!-- ES6中提供了Set数据容器，这是一个能够`存储无重复值的有序列表`。
+ 通过`new Set()`可以创建Set，然后通过`add`方法能够向Set中添加数据项
+  -->
+ 原来**Set**是一个**集合**的数据结构，**Map**是一种叫**字典**的数据结构。
+ ##### 集合
+ * 集合是由一组无序切不重复的项组成,可以想象集合是一个既没有重复元素又没有顺序概念的数组。
+ * ES6中提供了新的数据结构Set。它类似数组，但是它的成员时唯一的，没有重复的值。
+ * Set本身就是一个构造函数，用来生成Set结构
+ ```javascript
+  let set  = new Set();
+  set.add(1);
+  set.add("1");
+  console.log(set.size()) // 2
+ ```
+ ##### Set实例的属性和方法
+ * Set的属性：set.size();返回集合中元素的数量
+ * Set的方法：
+  * 操作方法：
+    * add(val) ：向集合中添加新的项
+    * delete(val) ： 删除集合中一个项
+    * has(val) ：判断该值是否存在于集合中，返回Boolean
+    * clear() ：将集合清空
+  * 遍历方法：
+    * keys() ：返回一个包含集合中所有键的数组
+    * values() ：返回一个包含集合中所有值的数组
+    * entries() ：返回一个包含集合中键值对的数组(实用性不高)
+    * forEach() ：用于对集合成员执行某种操作，没有返回值。
+    
+ ##### has方法
+ 首先要实现的是has方法，因为在add或delete等方法中都会调用，下面看看它的实现
+ ```javascript
+    function Set(){
+      let items={};
+      this.size = 0 ; 
+      this.has=function(val){
+        // 对象都有hasOwnProperty方法，判断是否拥有特性属性
+        return items.hasOwnProperty(val);
+      }
+    }
+ ```
 
- # ES6 中Set、Map类型的内部实现
+ ##### add方法
+ ```javascript
+  this.add = function(val){
+    if(!this.has(val)){
+      items[val] = val;
+      this.size++
+      return true
+    }
+    return false
+  }
+ ``` 
 
+ ##### delete和clear方法
+ ```javascript
+  this.delete = function(val){
+    if(this.has(val)){
+      delete items[val];
+      this.size --;
+      return true;
+    }
+    return false;
+  }
+
+  this.clear= function(){
+    items = {};
+    this.size = 0 ;
+  }
+
+ ```
+
+ ##### keys和values方法
+  可通过ES6对Object的扩展可以轻松实现对应的方法：
+ ```javascript
+  this.keys = function(){
+    return Object.keys(items); // 返回遍历集合的所有键名的数组
+  }
+
+  this.values = function(){
+    return Object.values(items); // 返回遍历集合的所有键值的数组 
+  }
+ ```
+  需要注意的是，Object的这几个方法都是按照值大小，从小到大遍历的数组。
+
+  ##### forEach方法
+  
 
  # React 
  ### React与vue的差异
@@ -188,97 +275,117 @@
  **promise**实例化时传入的函数会立即执行，**then(...)**中的回调需要异步延迟调用。在ESMAscript中规定明确**prosmie**是**微任务(micro-task)**。在执行任务时，JS引擎会将所有的任务按类别分为两个队列，首先是**宏任务(macro-task)**也叫**task queue**中取出一个任务，执行完后的，会在第一轮执行的宏任务中是否有微任务，有微任务的话立即执行，执行完后到浏览器渲染，然后再进行下一轮的宏任务执行。
 
 ### Promise状态
-**promise**必须为以下三种状态之一：等状态（pendding）、执行态（Fulfilled）和拒绝态（Rejected）。一旦**promise**被**resolve**或****
-<br/>
-# ES6 中Set、Map类型的内部实现
-> 主要知识点：Set的基本操作，Weak Set，Map的基本操作，Weak Map
- ![SetMap](./Set&Map/SetMap.png)
+**promise**必须为以下三种状态之一：等状态（pendding）、执行态（Fulfilled）和拒绝态（Rejected）。一旦**promise**被**resolve**或**reject**,不能再迁移至其他任何状态（即状态**immutable**）。
 
-### 1.ES6中的Set
- <!-- ES6中提供了Set数据容器，这是一个能够`存储无重复值的有序列表`。
- 通过`new Set()`可以创建Set，然后通过`add`方法能够向Set中添加数据项
-  -->
- 原来**Set**是一个**集合**的数据结构，**Map**是一种叫**字典**的数据结构。
- ##### 集合
- * 集合是由一组无序切不重复的项组成,可以想象集合是一个既没有重复元素又没有顺序概念的数组。
- * ES6中提供了新的数据结构Set。它类似数组，但是它的成员时唯一的，没有重复的值。
- * Set本身就是一个构造函数，用来生成Set结构
- ```javascript
-  let set  = new Set();
-  set.add(1);
-  set.add("1");
-  console.log(set.size()) // 2
- ```
- ##### Set实例的属性和方法
- * Set的属性：set.size();返回集合中元素的数量
- * Set的方法：
-  * 操作方法：
-    * add(val) ：向集合中添加新的项
-    * delete(val) ： 删除集合中一个项
-    * has(val) ：判断该值是否存在于集合中，返回Boolean
-    * clear() ：将集合清空
-  * 遍历方法：
-    * keys() ：返回一个包含集合中所有键的数组
-    * values() ：返回一个包含集合中所有值的数组
-    * entries() ：返回一个包含集合中键值对的数组(实用性不高)
-    * forEach() ：用于对集合成员执行某种操作，没有返回值。
+### Promise构造函数
+从构造函数开始，一步一步实现**promise/A+**规范的**promise**。大概描述下，**promise**构造函数需要做什么事情。
+```javascript
+  function Promimse(fn){
+    // 省略非new 实例化方式处理
+    // 省略 fn 非函数异常处理
+
+    // promise状态变量
+    // 0 - pending
+    // 1 - resolved
+    // 2 - rejected 
+    this._state = 0 ;
+    // promise的执行结果
+    this._value  = null;
+
+    // then(...)注册回调处理数组
+    this._deferreds = [] ;
     
- ##### has方法
- 首先要实现的是has方法，因为在add或delete等方法中都会调用，下面看看它的实现
+    // 立即执行fn函数
+    try{
+      fn(value=>{
+        resolve(this, value);
+      },reason=>{
+        reject(this, reason);
+      })
+    }catch(err){
+      // 处理执行fn异常
+      reject(this, err)
+    }
+  }
+```
+
+### then函数
+**proimise/A+**提到规范专注于提供通用的**then**方法，**then**方法可以被用一个**promise**调用多次，每次返回新**promise**对象。**then**方法接受两个参数**onResolve**、**onRejected**（可选）。在**promise**被**resolve**或**reject**后，所有**onResolved**或**onRejected**函数须按照其注册顺序依次回调，且调用次数不超过一次。
+根据上述，**then**函数执行流程大致为：
+1、实例化空**promise**对象用来返回（保持**then**链式调用）
+2、构造**then(...)**注册回调处理函数结构体
+3、判断当前**promise**状态，**pending**状态存储延迟处理对象**deferred**，非**pending**状态执行**onResolved**或**onRejected**回调
+4、...
+```javascript
+  Promise.prototype.then = function(onResolved , onRejected){
+    var res = new Promise(function(){});
+
+    // 使用 onResolved , onRejected 实例化处理对象 Handler
+    var deferred = new Handler( onResolved , onRejected , res );
+
+    // 当前状态为 pendding ，存储延迟处理对象=
+    if(this._state === 0){
+      this._deferreds.push(deferred);
+      return res
+    }
+
+    // 当前 promise 状态不为pending
+    // 调用handleResolved 执行 onResolved或onRejected回调
+    handleResolved(this, deferred);
+
+    // 返回新 promise 对象，维持链式调用
+    return res;
+  }
+```
+
+### 链式调用为什么要返回新的promise
+ 如我们理解，为保证**then**函数链式掉调用，**then**需要返回**promise**实例。但为什么返回新的`promise`，而不是直接返回`this`当前对象？看下面代码：
  ```javascript
-    function Set(){
-      let items={};
-      this.size = 0 ; 
-      this.has=function(val){
-        // 对象都有hasOwnProperty方法，判断是否拥有特性属性
-        return items.hasOwnProperty(val);
-      }
+  var promise2 =  promise1.then(function(value){
+    return Promise.reject(3);
+  });
+ ```
+ 假如`then`函数执行返回`this`调用对象本身，那么`promise2 === promise1`，`promise2`状态也应该等于`promise1`同为`resolved`。而`onResolved`回调返回状态为`rejected`对象。考虑到`promise`状态一旦`resolved`或`rejected`就不能再迁移，所以这里`promise2`也没办法转为回调函数返回的`rejected`状态，产生矛盾。
+ `handleResolved`函数功能未根据当前`promise`状态，异步执行`onResolved`或`onRejected`回调函数。因在`resolve`或`reject`函数内部同样需要相关功能，提取为单独模块。
+
+ ### 手写JS实现promise
+  **构造函数**
+ ```javascript
+    // 存储 mPromise
+    let that;
+    
+    /*
+    * 因为每次new mPromise（then ，catch的时候都需要链式调用）会调用 mPromise（constructor），所以放外面
+    */
+
+    // 状态、参数配置
+    let concfig = {
+        status : null,
+        resolveParam: null,
+        rejectParam: null
+    };
+
+    /*
+    * mPromise函数：原生Promise 的手动实现
+    * @param{ new Promise 时传入的回调函数 } callback
+    */
+    function mPromise(callback){
+      that = this;
+      // 往 new mPromise 时传入的回调函数，传回两个参数
+      callback(that.resolve,that.reject)
     }
  ```
-
- ##### add方法
- ```javascript
-  this.add = function(val){
-    if(!this.has(val)){
-      items[val] = val;
-      this.size++
-      return true
+  **原型**
+  ```javascript
+    mPromise.prototype = {
+        constructor: mPromise,
+        resolve(param){
+          config.resolveParam : null; // 重置resolve参数
+          config.rejectParam : null;
+          config.status : "PENDING"
+        },
+        then(_fn){
+          // 有resolve 才调用
+        }
     }
-    return false
-  }
- ``` 
-
- ##### delete和clear方法
- ```javascript
-  this.delete = function(val){
-    if(this.has(val)){
-      delete items[val];
-      this.size --;
-      return true;
-    }
-    return false;
-  }
-
-  this.clear= function(){
-    items = {};
-    this.size = 0 ;
-  }
-
- ```
-
- ##### keys和values方法
-  可通过ES6对Object的扩展可以轻松实现对应的方法：
- ```javascript
-  this.keys = function(){
-    return Object.keys(items); // 返回遍历集合的所有键名的数组
-  }
-
-  this.values = function(){
-    return Object.values(items); // 返回遍历集合的所有键值的数组 
-  }
- ```
-  需要注意的是，Object的这几个方法都是按照值大小，从小到大遍历的数组。
-
-  ##### forEach方法
-  
-  
+  ```
