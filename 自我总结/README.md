@@ -43,7 +43,7 @@
     这是因为服务端在LISTEN状态下，收到建立链接请求的SYN报文后，把ACK和SYN放在一个报文里发送给客户端。而关闭链接时，当收到对方的FIN报文时，仅仅表示对方不在发送数据了，但是还是能接收数据，己方是否现在关闭发送数据通道，需要上层应用来决定，因此，己方ACK和FIN一般都会分开发送。
 
 
-### TCP为什么不是4此握手，2次挥手？
+### TCP为什么不是4次握手，2次挥手？
   《计算机网络》第四版中讲“三次握手”的目的是“为了防止已失效的连接请求报文段突然又传送到了服务端，因而产生错误”。
 
 ### HTTP报文
@@ -100,7 +100,7 @@
  <!-- ES6中提供了Set数据容器，这是一个能够`存储无重复值的有序列表`。
  通过`new Set()`可以创建Set，然后通过`add`方法能够向Set中添加数据项
   -->
- 原来**Set**是一个**集合**的数据结构，**Map**是一种叫**字典**的数据结构。
+ 原来`Set`是一个`集合`的数据结构，`Map`是一种叫`字典`的数据结构。
  ##### 集合
  * 集合是由一组无序切不重复的项组成,可以想象集合是一个既没有重复元素又没有顺序概念的数组。
  * ES6中提供了新的数据结构Set。它类似数组，但是它的成员时唯一的，没有重复的值。
@@ -202,6 +202,9 @@
   Virtual DOM 是一个映射真实DOM的JavaScript对象，如果需要改变任何元素的状态，那么是现在Virtual DOM上进行改变，而不是直接改变真实DOM。当有变化产生时，一个新的Virtual DOM对象会被创建并计算新旧Virtual DOM之间的差别（这里涉及到Diff算法）。之后这些差别会应用在真实的DOM上。
 
  ### Diff算法
+  1. diff算法的作用：计算出Virtual DOM中真正变化的部分，并只针对该部分进行原生DOM操作，而非重新渲染真个页面。
+  2. 传统的diff算法：通过循环递归对节点进行依次对比，算法复杂度达到O(n^3)，n是树的节点数。比如1000个节点，会进行上亿次的比较。
+  
 
  ### setState是真正的异步嘛？什么时候是异步？什么时候是同步？
   1. setState并不是真正的异步，只是在实现上产生异步的错觉。他还是同步的。dan神给出的两个理由：
@@ -252,12 +255,12 @@
  ### promise是什么
  > A promise represents the eventual result of an asynchronous operation. --Promises/A+
  > A Promise is an object that is used as a placeholder for the eventual results of a deferred (and possibly asynchronous) computation.  --ECMAscript
-  **Promise/A+**规范中标识为一个异步操作的最终结果，**ECMAscript**规范定义为延时或异步计算最终结果的占位符。严格来说，**Promise**是一种封装和组合未来值得易于复用机制，实现关注点分离，异步流程控制，异常冒泡，串行/并行控制等。
+  `Promise/A+`规范中标识为一个异步操作的最终结果，`ECMAscript`规范定义为延时或异步计算最终结果的占位符。严格来说，`Promise`是一种封装和组合未来值得易于复用机制，实现关注点分离，异步流程控制，异常冒泡，串行/并行控制等。
   
 ### thenable对象
-  **thenable**是一个定义**then(...)**方法的对象或函数。**thenable**对象的存在目的是使**Promise**的实现更具有通用性，只要其暴露出一个遵循**promise/A+**规范的**then(...)**方法。同时也会使遵循**promise/A+**规范的实现可以与那些不太规范但可用的实现能良好共存。
+  `thenable`是一个定义`then(...)`方法的对象或函数。`thenable`对象的存在目的是使`Promise`的实现更具有通用性，只要其暴露出一个遵循`promise/A+`规范的`then(...)`方法。同时也会使遵循`promise/A+`规范的实现可以与那些不太规范但可用的实现能良好共存。
 
-  识别**thenable**或行为类似**Promise**对象可以根据其是否具有**then(...)**方法来判断，这其实叫**类型检查**也可以叫**鸭式辨型**。对于**thenable**值鸭式类型检测大致类似于：
+  识别`thenable`或行为类似`Promise`对象可以根据其是否具有`then(...)`方法来判断，这其实叫`类型检查`也可以叫`鸭式辨型`。对于`thenable`值鸭式类型检测大致类似于：
   ```javascript
     if( p !== null && 
         (
@@ -272,13 +275,13 @@
      }
   ```
 ### then 回调异步执行
- **promise**实例化时传入的函数会立即执行，**then(...)**中的回调需要异步延迟调用。在ESMAscript中规定明确**prosmie**是**微任务(micro-task)**。在执行任务时，JS引擎会将所有的任务按类别分为两个队列，首先是**宏任务(macro-task)**也叫**task queue**中取出一个任务，执行完后的，会在第一轮执行的宏任务中是否有微任务，有微任务的话立即执行，执行完后到浏览器渲染，然后再进行下一轮的宏任务执行。
+ `promise`实例化时传入的函数会立即执行，`then(...)`中的回调需要异步延迟调用。在ESMAscript中规定明确`prosmie`是`微任务(micro-task)`。在执行任务时，JS引擎会将所有的任务按类别分为两个队列，首先是`宏任务(macro-task)`也叫`task queue`中取出一个任务，执行完后的，会在第一轮执行的宏任务中是否有微任务，有微任务的话立即执行，执行完后到浏览器渲染，然后再进行下一轮的宏任务执行。
 
 ### Promise状态
-**promise**必须为以下三种状态之一：等状态（pendding）、执行态（Fulfilled）和拒绝态（Rejected）。一旦**promise**被**resolve**或**reject**,不能再迁移至其他任何状态（即状态**immutable**）。
+`promise`必须为以下三种状态之一：等状态（pendding）、执行态（Fulfilled）和拒绝态（Rejected）。一旦`promise`被`resolve`或`reject`,不能再迁移至其他任何状态（即状态`immutable`）。
 
 ### Promise构造函数
-从构造函数开始，一步一步实现**promise/A+**规范的**promise**。大概描述下，**promise**构造函数需要做什么事情。
+从构造函数开始，一步一步实现`promise/A+`规范的`promise`。大概描述下，`promise`构造函数需要做什么事情。
 ```javascript
   function Promimse(fn){
     // 省略非new 实例化方式处理
@@ -310,11 +313,11 @@
 ```
 
 ### then函数
-**proimise/A+**提到规范专注于提供通用的**then**方法，**then**方法可以被用一个**promise**调用多次，每次返回新**promise**对象。**then**方法接受两个参数**onResolve**、**onRejected**（可选）。在**promise**被**resolve**或**reject**后，所有**onResolved**或**onRejected**函数须按照其注册顺序依次回调，且调用次数不超过一次。
-根据上述，**then**函数执行流程大致为：
-1、实例化空**promise**对象用来返回（保持**then**链式调用）
-2、构造**then(...)**注册回调处理函数结构体
-3、判断当前**promise**状态，**pending**状态存储延迟处理对象**deferred**，非**pending**状态执行**onResolved**或**onRejected**回调
+`proimise/A+`提到规范专注于提供通用的`then`方法，`then`方法可以被用一个`promise`调用多次，每次返回新`promise`对象。`then`方法接受两个参数`onResolve`、`onRejected`（可选）。在`promise`被`resolve`或`reject`后，所有`onResolved`或`onRejected`函数须按照其注册顺序依次回调，且调用次数不超过一次。
+根据上述，`then`函数执行流程大致为：
+1、实例化空`promise`对象用来返回（保持`then`链式调用）
+2、构造`then(...)`注册回调处理函数结构体
+3、判断当前`promise`状态，`pending`状态存储延迟处理对象`deferred`，非`pending`状态执行`onResolved`或`onRejected`回调
 4、...
 ```javascript
   Promise.prototype.then = function(onResolved , onRejected){
@@ -339,7 +342,7 @@
 ```
 
 ### 链式调用为什么要返回新的promise
- 如我们理解，为保证**then**函数链式掉调用，**then**需要返回**promise**实例。但为什么返回新的`promise`，而不是直接返回`this`当前对象？看下面代码：
+ 如我们理解，为保证`then`函数链式掉调用，`then`需要返回`promise`实例。但为什么返回新的`promise`，而不是直接返回`this`当前对象？看下面代码：
  ```javascript
   var promise2 =  promise1.then(function(value){
     return Promise.reject(3);
@@ -349,7 +352,7 @@
  `handleResolved`函数功能未根据当前`promise`状态，异步执行`onResolved`或`onRejected`回调函数。因在`resolve`或`reject`函数内部同样需要相关功能，提取为单独模块。
 
  ### 手写JS实现promise
-  **构造函数**
+  `构造函数`
  ```javascript
     // 存储 mPromise
     let that;
@@ -375,7 +378,7 @@
       callback(that.resolve,that.reject)
     }
  ```
-  **原型**
+  `原型`
   ```javascript
     mPromise.prototype = {
         constructor: mPromise,
