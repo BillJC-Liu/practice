@@ -392,3 +392,146 @@
         }
     }
   ```
+
+ # 继承
+ ### javascript中常见的几种继承方式
+ 首先需要了解原型链机制：在ECMAscript中描述了原型链的概念，并将原型链作为实现继承的主要方法，其基本思想就是利用原型让一个引用类型继承另一个应用类型的属性和方法。
+ 构造函数和原型还有实例之间的关系：每个构造函数都有一个原型对象(prototype)，原型对象都包含一个执行构造函数的指针（constructor），而实例都包含一个指向原型对象的内部指针(__proto__)。
+
+ ![yxl](./jc/yxl.png)
+ 
+ 每一个Function都是Obejct积累的一个实例，所以每个Function上都有一个`__proto__`指向看了Object.prototype。当查找一个实例的属性时，会先从这个实例的自定义属性上找，如果没有的话，通过__proto__去实例所属类的原型上找，如果海尔米有的话再通过原型（原型也是对象，只要是对象就有__proto__属性）的__proto__到Object的原型上去找，一级一级的找，如果没有就返回undefined。
+
+ 可以说应用类型之间的继承就是通过原型链机制实现的。到这里我们就可以看一下第一种继承方法，原型继承。
+
+ ### 1.原型继承
+ 原型继承：把父类的私有+公有的属性和方法，都作为子类公有的属性。<br>
+ 核心：不是把父类私有+公有的属性克隆一份一模一样的给子类的公有；它是通过`__proto__`建立和之类之间的原型链，当之类的实例需要使用父类的属性和方法的时候，可以通过`__proto__`一级级往上查找。
+ ```javascript
+    function Parent(){
+      this.x = 1;
+      this.y = 2;
+    }
+
+    Parent.prototype.say = function(){
+      console.log("say");
+    }
+
+    function Child(){
+      this.z = 3;
+    }
+
+    CHild.prototype = new Parent();
+    var p = new Parent();
+    var c = new Child();
+    console.log(c);
+ ```
+ 实现的本质是重写了原型对象，通过将子类的原型指向了父类的实例，所以子类的实例就可以通过`__proto__`访问到`child.prototype`也就是Parent的实例，这样就可以访问到父类的私有方法，然后在通过`__proto__`指向父类的`prototype`就可以或得到父类原型上的方法。这样就做到了将父类的私有、公有方法和属性都当做子类的公有属性。这样就通过原型链实现了继承。但是别忘了默认的原型，因为所有引用类型都是继承了Object的，所以说子类也可以访问到Object上的方法，如valueOf,toString。<br>
+ 这时候通过 intanceof 检测：
+ ```javascript
+   c instanceof Child  // true
+   c instanceof Parent  // true
+   c instanceof Object  // true
+ ```
+  但是，需要我们注意一点的是，有的时候我们需要在子类中添加新的方法或者重写父类的方法时候，切记一定要放到替换原型的语句之后。
+  
+  ```javascript
+    function Parent(){
+      this.x = 199;
+      this.y = 299;
+    }
+
+    Parent.prototype.say = function(){
+      console.log('say')
+    }
+
+    function Child(){
+      this.g = 90;
+    }
+
+    // 在这里写子类的原型方法和属性是没用的
+    // 因为后面的语句中会将Child的原型链改变指向，所以需要在改变原型链改变后在进行指定。
+    Child.prototype.Bs = function(){
+      console.log("Bs")
+    } 
+
+    Child.prototype = new Parent();
+
+    //由于重新修改了Child的原型导致默认原型上的constructor丢失，我们需要自己添加上，其实没啥用，加不加都一样
+    Child.prototype.constructor = Child;
+
+    Child.prototype.Bs = function(){
+      console.log('Bs')
+    }
+
+    Child.prototype.say = function(){
+      console.log('之后改的')
+    }
+
+    var p = new Parent();
+    var c = new Child();
+    console.dir(c)
+    c.Bs()  //Bs
+    c.say()   // 之后改的
+    p.say()  //say 不影响父类实例访问父类的方法
+
+  ```
+
+  原型继承的问题：
+  1. 子类继承父类的属性和方法是将富尅的私有属性和公有方法都作为自己的公有属性和方法，我们要清楚一件事情就是我们操作基本数据类型的时候操作的是值，在操作应用数据类型的时候操作的是地址，日过说父类的私有属性中应用类型的属性，那它被之类继承的时候会作为公有属性，这样之类易操作这个属性的时候，会影响到值了二。
+  2. 在创建之类的实例时，不能像父类型的构造函数中传递参数。应该说是没有办法在不影响所有对象实例的情况下，给父类的构造函数传递参数。
+  所以在实际中很少单独使用原型继承。
+
+### 2.call继承
+call方法是将方法的this指向改变同时执行方法。在子类构造函数中，父类.call(this)可以将父类的私有变成子类的私有。
+```javascript
+  function Parent(){
+    this.x = 100;
+    this.y = 199;
+  }
+
+  Parent.prototype.fn = function(){
+    
+  }
+
+  function Child(){
+    this.d = 100;
+    // 构造函数中的this就是当前实例。
+    // 在子类构造函数中 父类.call(this) 可以将父类的私有变成子类的私有
+    Parent.call(this);
+  }
+
+  var p = new Parent();
+  var c = new Child();
+  console.log(p); // Parent { x:100 , y:199 }
+  console.log(c); // Child { d:100 , x:100 , y:199 }
+
+```
+ ### 3. 冒充对象继承
+ 冒充对象继承的原理是循环遍历父类实例，然后父类实例的私有方法全部拿过来添加给子类实例
+```javascript
+  function Parent(){
+    this.x = 100;
+  }
+
+  Parent.prototype.getX = function(){
+    console.log('getX');
+  }
+
+  function Child(){
+    var p = new Parent();
+
+    // for in 可以遍历到原型上的公有自定义属性 
+    for( var attr in p ){
+      this[attr] = p[attr];
+    }
+  }
+
+  var p = new Parent();
+  var c = new Child();
+  console.dir(c)
+
+``` 
+  这里只有一点重要的，for in可以遍历到原型上的所有方法和属性，所以它可以拿到私有和公有的属性和方法，这个你可以遍历私有和公有的，需要你加限制条件。但是如果不做`hasOwnProperty`判断那么就是把父类的公有的和私有的都拿过来当私有的。
+
+### 4. 混合继承
